@@ -8,7 +8,7 @@ from typing import Literal
 
 from mbctl.utils.man8log import logger
 from mbctl.utils.man8config import config, ContainerTemplate, ContainerTemplateList
-from mbctl.utils.file_operate import copy_all_contents
+from mbctl.utils.file_operate import empty_and_copy_all_contents
 from mbctl.config_formats import (
     OCIConfig,
     Man8SContainerInfo,
@@ -134,7 +134,7 @@ def pull_oci_image_and_create_container(
         if os.path.exists(mount_point_real_path) and os.path.isdir(
             mount_point_real_path
         ):
-            copy_all_contents(
+            empty_and_copy_all_contents(
                 man8s_container_info.get_container_path_str(mount_point),
                 target_path,
             )
