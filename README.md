@@ -74,7 +74,7 @@ nspawn 配置，这里定义的环境变量都是一些无关紧要的环境变�
 [Exec]
 Boot=no
 ProcessTwo=yes
-Parameters=/sbin/busybox-init.sh
+Parameters=/man8s-init/00-init.sh.sh
 ResolvConf=copy-stub
 Timezone=copy
 LinkJournal=no
@@ -146,7 +146,7 @@ MAN8S_APPLICATION_ARGS 是实际需要执行的命令（实际是一个需要传
 
 mbctl 使用 docker、busybox 作为依赖。
 
-### Man8S 固定ygg内网IPv6地址
+### Man8S 网络配置
 
 Man8S的内网地址分为两种：
 - 动态DHCP/SLAAC分配IPv4/IPv6地址
@@ -154,20 +154,19 @@ Man8S的内网地址分为两种：
 
 其中前者用于容器网络访问，后者用于容器互联。容器中的软件监听在ygg地址上，可以从内网地址访问该容器。
 
-### Man8S busybox init
+1. ygg (前缀 300:0:0:1::/64)：
+    - 直连 300:0:0:1::/64 的流量直接通过 host0（链路/邻居发现）。
+    - 仅 200::/7 范围的目标通过网关 300:0:0:1::1 发出，且源地址指定为 300:0:0:1::100。
+2. IPv6 ULA (前缀 fc00::/64)：
+    - 直连 fc00::/64 的流量直接通过 host0。
+    - 其他（default）流量通过 ULA 网关 fc00::f:e:d:c 发出，且源地址指定为 fc00::a:b:c:d。
 
-安装init系统的方法：
+### Man8S init
 
-man8lize-container.sh 
+容器启动前需要做一些准备工作，配置好自己的环境变量和网络地址，并确保所有的网络地址和环境变量正确配置，才能正式启动应用。
 
 init过程总体分如下几步：
-1. /sbin/busybox-init.sh
-2. /sbin/busybox-execute.sh
-3. /sbin/busybox-copy-protected-dirs.sh
-4. /sbin/busybox-load-envs.sh
-5. /sbin/busybox-autoconfig-networking.sh
-6. /sbin/yggdrasil-config-ipaddr.sh
-7. /sbin/application.sh
+
 
 ## 开发计划
 

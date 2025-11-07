@@ -11,6 +11,7 @@ def copy_resdir_content_to_target_folder(src_resource_package_name, dst_folder):
     for entry in src_resource.iterdir():
         target_path = os.path.join(dst_folder, entry.name)
         if entry.is_dir():
+            logger.debug(f'Entering directory {entry}')
             copy_resdir_content_to_target_folder(entry, target_path)
         else:
             with entry.open('rb') as fsrc, open(target_path, 'wb') as fdst:

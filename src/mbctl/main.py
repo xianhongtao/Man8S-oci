@@ -1,6 +1,7 @@
 import argparse
 import sys
 from typing import Optional
+import logging
 
 from mbctl import __version__
 from mbctl.utils.man8config import config, ContainerTemplate, ContainerTemplateList
@@ -14,6 +15,8 @@ from mbctl.get_bundle.get_oci import fetch_oci_to_rootfs
 
 def build_parser() -> argparse.ArgumentParser:
 	parser = argparse.ArgumentParser(prog="mbctl", description="mbctl 命令行工具")
+	# Add global verbose flag to enable debug logging
+	parser.add_argument("-v", "--verbose", action="store_true", help="enable verbose debug logging")
 	subparsers = parser.add_subparsers(dest="command_group", required=True)
 
 	# machines 分组
@@ -62,6 +65,13 @@ def main(argv: Optional[list[str]] = None) -> int:
 		argv = sys.argv[1:]
 	parser = build_parser()
 	args = parser.parse_args(argv)
+
+	# Enable debug logging when verbose flag is provided
+	if getattr(args, "verbose", False):
+		# set root logger and module logger to DEBUG
+		logging.getLogger().setLevel(logging.DEBUG)
+		logger.setLevel(logging.DEBUG)
+		logger.debug("Verbose logging enabled")
 
 	if args.command_group == "machines":
 		if args.machines_cmd == "pull":

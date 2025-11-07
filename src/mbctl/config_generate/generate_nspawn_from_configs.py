@@ -16,7 +16,7 @@ def generate_nspawn_config_from_configs(
     nspawn_config = NspawnConfig(nspawn_example_config_content)
 
     # 设置init脚本和man8env.env挂载
-    nspawn_config.set_exec_command("/sbin/busybox-init.sh")
+    nspawn_config.set_exec_command("/man8s-init/00-init.sh")
     nspawn_config.add_bind_mount_idmap(
         "/man8env.env",
         man8s_config.get_container_man8env_config_path_str()
@@ -25,7 +25,7 @@ def generate_nspawn_config_from_configs(
     # 设置命令行参数
     process_args = oci_config.get_process_args()
     if process_args:
-        nspawn_config.set_exec_command("/sbin/busybox-init.sh")
+        nspawn_config.set_exec_command("/man8s-init/00-init.sh")
 
     # 设置环境变量。注意nspawn配置中只设置不属于软件配置的环境变量，属于容器配置的环境变量应该写入 config.man8machine_configs_path / man8env.env 中。
     normal_envs = oci_config.get_process_normal_envs()

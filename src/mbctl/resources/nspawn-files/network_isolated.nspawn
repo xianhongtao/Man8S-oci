@@ -1,7 +1,7 @@
 [Exec]
 Boot=no
 ProcessTwo=yes
-Parameters=/sbin/busybox-init.sh
+Parameters=/man8s-init/00-init.sh
 
 ResolvConf=copy-stub
 Timezone=copy

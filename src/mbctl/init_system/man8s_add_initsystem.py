@@ -7,7 +7,7 @@ man8s_add_initsystem.py
 用法: python3 man8s_add_initsystem.py <MACHINE_PATH>
 
 此脚本会将主机的 busybox 复制到 <MACHINE_PATH>/bin，确保存在指向 busybox 的 `sh` 链接，
-将 man8lib 的 busybox init 脚本复制到 <MACHINE_PATH>/sbin，并将 udhcpc 的默认脚本安装到
+将 man8lib 的 man8s-init 脚本复制到 <MACHINE_PATH>/man8s-init，并将 udhcpc 的默认脚本安装到
 <MACHINE_PATH>/usr/share/udhcpc/default.script。
 """
 
@@ -30,11 +30,12 @@ def install_init_system_to_machine(machine_path_str: str) -> None:
     machine_path = Path(machine_path_str).resolve()
 
     bin_dir = machine_path / "bin"
-    sbin_dir = machine_path / "sbin"
+    # sbin_dir = machine_path / "sbin"
+    man8s_init_dir = machine_path / "man8s-init"
     udhcpc_target_dir = machine_path / "usr" / "share" / "udhcpc"
 
     # 1. 确保目标目录存在
-    for d in (bin_dir, sbin_dir, udhcpc_target_dir):
+    for d in (bin_dir, udhcpc_target_dir, man8s_init_dir):
         d.mkdir(parents=True, exist_ok=True)
 
     # 2. 复制 busybox
@@ -52,14 +53,14 @@ def install_init_system_to_machine(machine_path_str: str) -> None:
     if not sh_link.exists():
         sh_link.symlink_to("busybox")
 
-    # 4. 复制 man8lib/busybox-init/* 到 <machine>/sbin
-    copy_resdir_content_to_target_folder("mbctl.resources.busybox-init", sbin_dir)
+    # 4. 复制 man8lib/man8s-init/* 到 <machine>/man8s-init/
+    copy_resdir_content_to_target_folder("mbctl.resources.man8s-init", man8s_init_dir)
 
     # 5. 安装 udhcpc-default.script
     copy_resdir_content_to_target_folder("mbctl.resources.busybox-networking", udhcpc_target_dir)
 
-    # 6. 确保 udhcpc/default.script 、 /sbin/busybox-init.sh 可执行
-    for script in (udhcpc_target_dir / "default.script", sbin_dir / "busybox-init.sh"):
+    # 6. 确保 udhcpc/default.script 、 /man8s-init/00-init.sh 可执行
+    for script in (udhcpc_target_dir / "default.script", man8s_init_dir / "00-init.sh"):
         script.chmod(script.stat().st_mode | stat.S_IEXEC)
 
 

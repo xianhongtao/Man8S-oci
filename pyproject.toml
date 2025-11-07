@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mbctl"
-version = "0.3.1"
+version = "0.4.1"
 description = "System container orchestration tool for systemd-nspawn containers"
 readme = "README.md"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 requires-python = ">=3.9"
 authors = [
     { name = "Neboer", email = "rubinposter@gmail.com" }
@@ -30,7 +30,6 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: System Administrators",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -58,3 +57,7 @@ zip-safe = false
 
 [tool.setuptools.package-data]
 "*" = ["*"]
+
+[tool.setuptools_scm]
+# Intentionally empty: present to satisfy tools that expect a tool.setuptools_scm table
+tag_regex = "^(?P<version>\\d+\\.\\d+\\.\\d+)$"
