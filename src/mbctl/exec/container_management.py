@@ -34,7 +34,7 @@ def remove_container(name: str) -> None:
     """删除指定的容器"""
     container_lib_root = Path(config["man8machines_path"]) / name
     container_system_root = Path(config["system_machines_path"]) / name
-    container_nspawn_file = Path(config["nspawn_file_path"]) / f"{name}.nspawn"
+    container_nspawn_file = Path(config["system_nspawn_file_path"]) / f"{name}.nspawn"
     container_config_root = Path(config["man8machine_configs_path"]) / name
     container_storage_root = Path(config["man8machine_storage_path"]) / name
 

@@ -30,7 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
 	## shell 子命令
 	shell = machines_sub.add_parser("shell", help="进入容器 shell")
 	shell.add_argument("name", help="容器名称")
-	shell.add_argument("--command", help="替代 shell 的命令", default="/bin/sh")
+	shell.add_argument('all_command', nargs=argparse.REMAINDER)
 	## remove 子命令
 	remove = machines_sub.add_parser("remove", help="删除容器")
 	remove.add_argument("name", help="要删除的容器名称")
@@ -77,7 +77,8 @@ def main(argv: Optional[list[str]] = None) -> int:
 		if args.machines_cmd == "pull":
 			pull_oci_image_and_create_container(args.source, args.name, args.template)
 		elif args.machines_cmd == "shell":
-			shell_container(args.name, args.command)
+			# 如果没有传入命令，则传入空列表，正好触发默认 shell 行为
+			shell_container(args.name, args.all_command)
 		elif args.machines_cmd == "remove":
 			remove_container(args.name)
 		else:

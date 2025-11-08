@@ -68,7 +68,7 @@ def pull_oci_image_and_create_container(
     oci_image_url: str,
     container_name: str,
     container_template: ContainerTemplate,
-    provided_mount_configs: dict = {},
+    provided_mount_configs: dict = {}
 ):
     # 1：创建man8s_config
 
