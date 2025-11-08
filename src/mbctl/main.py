@@ -11,6 +11,7 @@ from mbctl.exec.container_management import remove_container, clear_cache_dir
 from mbctl.exec.get_suffix_address_of_name import print_ipv6_suffix
 from mbctl.utils.man8log import logger
 from mbctl.get_bundle.get_oci import fetch_oci_to_rootfs
+from mbctl.init_system.man8s_add_initsystem import install_init_system_to_machine
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -57,6 +58,9 @@ def build_parser() -> argparse.ArgumentParser:
 	download = oci_sub.add_parser("download", help="将 OCI 镜像拉取到根文件系统")
 	download.add_argument("source", help="镜像来源（例如 docker.io/registry）")
 	download.add_argument("local_path", help="目标本地容器路径（例如 ~/test_container）")
+	## man8init 子命令
+	man8init = oci_sub.add_parser("man8init", help="向指定路径安装 Man8S init 系统（覆盖安装）")
+	man8init.add_argument("machine_path", help="目标机器路径（例如 ~/test_container）")
 
 	return parser
 
@@ -102,6 +106,8 @@ def main(argv: Optional[list[str]] = None) -> int:
 	elif args.command_group == "oci":
 		if args.oci_cmd == "download":
 			fetch_oci_to_rootfs(args.source, args.local_path)
+		elif args.oci_cmd == "man8init":
+			install_init_system_to_machine(args.machine_path)
 	else:
 		parser.print_help()
 		return 2

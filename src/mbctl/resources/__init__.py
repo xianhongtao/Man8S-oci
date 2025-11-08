@@ -7,6 +7,7 @@ from mbctl.utils.man8log import logger
 def copy_resdir_content_to_target_folder(src_resource_package_name, dst_folder):
     # 将一个资源目录的所有内容递归复制到目标文件夹
     os.makedirs(dst_folder, exist_ok=True)
+    logger.debug(f'Copying resources from {src_resource_package_name} to {dst_folder}')
     src_resource = files(src_resource_package_name)
     for entry in src_resource.iterdir():
         target_path = os.path.join(dst_folder, entry.name)

@@ -26,6 +26,7 @@ from mbctl.resources import copy_resdir_content_to_target_folder, get_file_conte
 
 HOST_BUSYBOX = Path(config["host_busybox_path"])
 
+# 向指定的机器路径安装 init 系统，如果已经存在则覆盖。相当于重新安装init系统。
 def install_init_system_to_machine(machine_path_str: str) -> None:
     machine_path = Path(machine_path_str).resolve()
 
@@ -53,32 +54,18 @@ def install_init_system_to_machine(machine_path_str: str) -> None:
     if not sh_link.exists():
         sh_link.symlink_to("busybox")
 
-    # 4. 复制 man8lib/man8s-init/* 到 <machine>/man8s-init/
+    # 4. 复制 man8lib/man8s-init/* 到 <machine>/man8s-init/。如果man8s_init_dir存在，则摧毁重建。
+    if man8s_init_dir.exists():
+        logger.info(f"删除 {man8s_init_dir} 处已存在的 man8s-init 目录")
+        shutil.rmtree(man8s_init_dir)
     copy_resdir_content_to_target_folder("mbctl.resources.man8s-init", man8s_init_dir)
 
-    # 5. 安装 udhcpc-default.script
+    # 5. 安装 udhcpc-default.script。如果存在则覆盖。
+    if udhcpc_target_dir.exists():
+        logger.info(f"删除 {udhcpc_target_dir} 处已存在的 udhcpc 目录")
+        shutil.rmtree(udhcpc_target_dir)
     copy_resdir_content_to_target_folder("mbctl.resources.busybox-networking", udhcpc_target_dir)
 
     # 6. 确保 udhcpc/default.script 、 /man8s-init/00-init.sh 可执行
     for script in (udhcpc_target_dir / "default.script", man8s_init_dir / "00-init.sh"):
         script.chmod(script.stat().st_mode | stat.S_IEXEC)
-
-
-def main(argv: list[str]) -> int:
-    if len(argv) != 2:
-        logger.error("用法: man8s_add_initsystem.py <MACHINE_PATH>")
-        return 2
-
-    machine_path = argv[1]
-
-    try:
-        install_init_system_to_machine(machine_path)
-    except Exception as e:
-        logger.error(f"错误：{e}")
-        return 1
-
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main(sys.argv))
