@@ -13,9 +13,9 @@ from mbctl.config_formats import (
     OCIConfig,
     Man8SContainerInfo,
     NspawnConfig,
-    EnvFileTools,
     OCIShallowConfig,
 )
+from mbctl.config_formats.env_file_tools import write_env_file
 from mbctl.config_generate import (
     generate_nspawn_config_from_configs,
     generate_env_config_from_configs,
@@ -142,12 +142,17 @@ def pull_oci_image_and_create_container(
 
     # 6：写入 nspawn 和 envs 配置文件到对应位置，创建
     nspawn_config.write_to_file(
-        man8s_container_info.get_container_nspawn_file_path_str()
+        man8s_container_info.get_container_nspawn_config_path_str()
+    )
+    ## container_config/<container_name>/container.nspawn -> /etc/systemd/nspawn/<container_name>.nspawn
+    os.symlink(
+        man8s_container_info.get_container_nspawn_config_path_str(),
+        man8s_container_info.get_container_system_nspawn_file_path_str(),
     )
     logger.info(
-        f"nspawn 配置文件已写入 {man8s_container_info.get_container_nspawn_file_path_str()}"
+        f"nspawn 配置文件已写入并建立符号链接 {man8s_container_info.get_container_nspawn_config_path_str()} -> {man8s_container_info.get_container_system_nspawn_file_path_str()}"
     )
-    EnvFileTools.write_env_file(
+    write_env_file(
         envs_config, man8s_container_info.get_container_man8env_config_path_str()
     )
     logger.info(

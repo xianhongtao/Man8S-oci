@@ -56,8 +56,11 @@ class Man8SContainerInfo:
     def get_container_man8env_config_path_str(self):
         return str(self.container_config_dir / "man8env.env")
 
-    def get_container_nspawn_file_path_str(self):
-        return str(Path(config["nspawn_file_path"]) / f"{self.name}.nspawn")
+    def get_container_system_nspawn_file_path_str(self):
+        return str(Path(config["system_nspawn_file_path"]) / f"{self.name}.nspawn")
+
+    def get_container_nspawn_config_path_str(self):
+        return str(self.container_config_dir / "container.nspawn")
 
     def check_is_storage_path(self, path: str) -> bool:
         # 检查给定路径是否在容器的存储路径下
