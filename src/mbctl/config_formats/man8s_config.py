@@ -40,9 +40,9 @@ class Man8SContainerInfo:
         env_vars = parse_env_file(basic_container_info.get_container_man8env_config_path_str())
 
         name = env_vars.get("MAN8S_CONTAINER_NAME", container_name)
-        oci_image_url = env_vars.get("MAN8S_CONTAINER_OCI_URL")
+        oci_image_url = env_vars.get("MAN8S_OCI_IMAGE_URL")
         template = env_vars.get("MAN8S_CONTAINER_TEMPLATE")
-        ygg_address = env_vars.get("MAN8S_CONTAINER_YGG_ADDRESS")
+        ygg_address = env_vars.get("MAN8S_YGGDRASIL_ADDRESS")
 
         return Man8SContainerInfo(
             name=name,

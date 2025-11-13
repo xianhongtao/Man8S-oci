@@ -40,9 +40,10 @@ def check_container_running(name: str) -> bool:
     return container_lck_file_location.exists()
 
 
-def remove_container(name: str, parts: Optional[List[ContainerPart]] = None) -> None:
+def remove_container(name: str, parts: Optional[List[ContainerPart]] = None) -> bool:
     """删除指定的容器或容器的指定部分
     parts 为 None 表示删除所有部分；否则只删除列表中指定的模块。
+    返回是否成功删除（如果容器不存在或指定部分不存在则视为删除失败）。
     """
     container_lib_root = Path(config["man8machines_path"]) / name
     container_system_root = Path(config["system_machines_path"]) / name
@@ -67,7 +68,7 @@ def remove_container(name: str, parts: Optional[List[ContainerPart]] = None) -> 
         invalid = [p for p in parts if not isinstance(p, ContainerPart) or p not in mapping]
         if invalid:
             logger.error(f"无效的部分指定: {invalid}")
-            return
+            return False
         targets = [mapping[p] for p in parts]
 
     # 只保留实际存在的路径
@@ -77,11 +78,11 @@ def remove_container(name: str, parts: Optional[List[ContainerPart]] = None) -> 
             logger.error(f"容器 '{name}' 不存在。")
         else:
             logger.error(f"容器 '{name}' 指定的部分不存在。")
-        return
+        return False
     else:
         if check_container_running(name):
             logger.error(f"容器 '{name}' 正在运行，无法删除。请先停止容器。")
-            return
+            return False
 
         deleted = []
         for desc, p in existing:
@@ -90,7 +91,9 @@ def remove_container(name: str, parts: Optional[List[ContainerPart]] = None) -> 
 
         if deleted:
             logger.info(f"容器 '{name}' 已删除: {', '.join(deleted)}。")
-
+            return True
+        
+    return False
 
 def clear_cache_dir() -> None:
     """清理临时缓存目录"""

@@ -39,8 +39,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--template",
         type=str,
         choices=ContainerTemplateList,
-        default="netns-init",
-        help="容器模板，默认为 netns-init",
+        default="netns-noinit",
+        help="容器模板，默认为 netns-noinit",
     )
     ## renew 子命令
     renew = machines_sub.add_parser("renew", help="重新创建容器的 rootfs（升级容器）")
@@ -99,7 +99,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         logger.setLevel(logging.DEBUG)
         logger.debug("Verbose logging enabled")
 
-    if args.command_group == "machines":
+    elif args.command_group == "machines":
         if args.machines_cmd == "pull":
             pull_oci_image_and_create_container(args.source, args.name, args.template)
         elif args.machines_cmd == "shell":
@@ -121,16 +121,18 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     elif args.command_group == "version":
         print(f"mbctl 版本：{__version__}")
-        return 0
+
     elif args.command_group == "oci":
         if args.oci_cmd == "download":
             fetch_oci_to_rootfs(args.source, args.local_path)
         elif args.oci_cmd == "man8init":
             install_init_system_to_machine(args.machine_path)
 
-    parser.print_help()
-    return 2
-
+    else:
+        parser.print_help()
+        return 2
+    
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())

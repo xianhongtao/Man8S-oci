@@ -16,19 +16,24 @@ from mbctl.utils.file_operate import empty_and_copy_all_contents
 from mbctl.utils.man8log import logger
 from mbctl.utils.man8config import config
 
-from .container_management import remove_container, ContainerPart
+from .remove_container import remove_container, ContainerPart
 
 def recreate_man8s_container_rootfs(
     man8s_container_info: Man8SContainerInfo,
 ):
     # 1. 删除已有的容器 rootfs 目录（如果存在的话）
-    remove_container(
+    remove_status = remove_container(
         man8s_container_info.name,
         parts=[
             ContainerPart.LIBRARY,
             ContainerPart.SYSTEM,
         ],
     )
+    
+    if not remove_status:
+        raise RuntimeError(
+            f"无法删除容器 '{man8s_container_info.name}' 的 rootfs，无法重新创建。"
+        )
 
     # 2. 从 OCI 镜像重新创建容器 rootfs
     if not man8s_container_info.oci_image_url:
