@@ -1,16 +1,24 @@
 from mbctl.utils.man8config import config
 
 from pathlib import Path
+from typing import Optional
+from mbctl.config_formats.env_file_tools import parse_env_file
 
 
 # Man8SContainerInfo 是一个Man8S容器的基本信息。它通常由配置文件与用户的命令行参数共同指定，表达这个Man8S容器的基本属性。
 class Man8SContainerInfo:
 
-    def __init__(self, name: str, template: str, ygg_address: str, oci_image_url: str):
+    def __init__(
+        self,
+        name: str,
+        oci_image_url: Optional[str] = None,
+        template: Optional[str] = None,
+        ygg_address: Optional[str] = None,
+    ):
         self.name = name
+        self.oci_image_url = oci_image_url
         self.template = template
         self.ygg_address = ygg_address
-        self.oci_image_url = oci_image_url
 
         # user_defined_mount_point 用于添加用户自定义的挂载点配置。
         # 这个配置只是“用户期望设置的挂载点”，真正的挂载点需要在生成nspawn配置文件时处理。
@@ -23,6 +31,24 @@ class Man8SContainerInfo:
         self.container_config_dir = Path(config["man8machine_configs_path"]) / self.name
         self.container_storage_dir = (
             Path(config["man8machine_storage_path"]) / self.name
+        )
+
+    @staticmethod
+    def from_env_file_of_container(container_name: str):
+        # 在加载之前，只是创建一个基本的basic_container_info方便后续操作，之后会丢掉。
+        basic_container_info = Man8SContainerInfo(container_name)
+        env_vars = parse_env_file(basic_container_info.get_container_man8env_config_path_str())
+
+        name = env_vars.get("MAN8S_CONTAINER_NAME", container_name)
+        oci_image_url = env_vars.get("MAN8S_OCI_IMAGE_URL")
+        template = env_vars.get("MAN8S_CONTAINER_TEMPLATE")
+        ygg_address = env_vars.get("MAN8S_YGGDRASIL_ADDRESS")
+
+        return Man8SContainerInfo(
+            name=name,
+            oci_image_url=oci_image_url,
+            template=template,
+            ygg_address=ygg_address,
         )
 
     # 添加用户自定义的挂载点的方便方法

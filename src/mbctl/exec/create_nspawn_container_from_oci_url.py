@@ -78,10 +78,10 @@ def pull_oci_image_and_create_container(
     logger.info(f"为容器 {container_name} 分配 Yggdrasil 地址 {ygg_address}")
 
     man8s_container_info = Man8SContainerInfo(
+        oci_image_url=oci_image_url,
         name=container_name,
         template=container_template,
         ygg_address=ygg_address,
-        oci_image_url=oci_image_url,
     )
 
     if os.path.exists(man8s_container_info.container_dir):

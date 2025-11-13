@@ -7,7 +7,7 @@ class TestPullOciImage(unittest.TestCase):
         pull_oci_image_and_create_container(
             oci_image_url="ghcr.nju.edu.cn/bitwarden/self-host:latest",
             container_name="TestBWContainer1",
-            container_template="network_isolated",
+            container_template="netns-init",
             provided_mount_configs={
                 "/etc/bitwarden": "/var/lib/man8machine_storage/TestBWContainer1/etc/bitwarden"
             }

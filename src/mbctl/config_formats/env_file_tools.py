@@ -1,4 +1,4 @@
-def parse_env_file(content: str) -> dict:
+def parse_env_content(content: str) -> dict:
     """Parses the content of an env file into a dictionary."""
     env_dict = {}
     lines = content.splitlines()
@@ -8,6 +8,12 @@ def parse_env_file(content: str) -> dict:
             key, _, value = line.partition("=")
             env_dict[key.strip()] = value.strip()
     return env_dict
+
+def parse_env_file(file_path: str) -> dict:
+    """Parses an env file into a dictionary."""
+    with open(file_path, "r", encoding="utf8") as f:
+        content = f.read()
+    return parse_env_content(content)
 
 def generate_env_file(env_dict: dict) -> str:
     """Generates the content of an env file from a dictionary."""
