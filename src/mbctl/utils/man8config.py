@@ -24,5 +24,5 @@ config = Man8Config(
     host_busybox_path="/bin/busybox",
 )
 
-ContainerTemplate = Literal["network_isolated"]
-ContainerTemplateList = ["network_isolated"]
+ContainerTemplate = Literal["netns-init", "netns-noinit", "netns-systemd"]
+ContainerTemplateList = ["netns-init", "netns-noinit", "netns-systemd"]

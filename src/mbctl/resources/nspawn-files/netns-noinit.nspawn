@@ -1,6 +1,7 @@
 [Exec]
 Boot=no
 ProcessTwo=yes
+KillSignal=SIGRTMIN+3
 Parameters=/man8s-init/00-init.sh
 
 ResolvConf=copy-stub

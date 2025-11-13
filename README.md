@@ -112,7 +112,7 @@ Bind=/var/lib/man8machine_configs/TestBWContainer3/etc/bitwarden:/etc/bitwarden:
 man8env.env 这是配置文件的一部分，用来定义容器环境变量。Docker容器的运行大都依赖环境变量传入，因此man8s中环境变量文件也是配置文件的一部分。
 ```bash
 MAN8S_CONTAINER_NAME=TestBWContainer3
-MAN8S_CONTAINER_TEMPLATE=network_isolated
+MAN8S_CONTAINER_TEMPLATE=netns-init
 MAN8S_YGGDRASIL_ADDRESS=300:2e98:a4b0:1789:1d44:bc13:a177:c4d
 MAN8S_OCI_IMAGE_URL=ghcr.io/bitwarden/self-host:latest
 MAN8S_APPLICATION_ARGS=/entrypoint.sh
@@ -202,8 +202,43 @@ init过程总体分如下几步：
 
 大多数docker容器都有自己的initsystem，比如 [tini](https://github.com/krallin/tini)、[dumb-init](https://github.com/Yelp/dumb-init)、[s6-overlay](https://github.com/just-containers/s6-overlay)、systemd、[pid1](https://github.com/fpco/pid1) 等等。这些init系统的行为各异，对 SIGKILL 与 SIGTERM 信号的响应方法也存在差异。目前 Man8S 统一使用PID2的方式管理这些容器，对其中的 init 系统并不公平，甚至 s6-overlay 的作者公开表示自己不会允许自己的软件运行在非PID1的环境中。我理解这些作者的想法，也清晰的知道Linux的容器化就是一个巨大的问题——Man8S不就是为了解决这个问题的吗对吧？所以我们会努力的支持所有的init系统，实现良好的Linux容器管理解决方案。
 
+鉴于docker容器实际执行的init程序与信号管理相关的问题，为了更加的规范、标准化这个过程，我决定使用SIGTERM作为容器的终止信号。但如果进程本身不是合格的PID1，使用此方法可能导致僵尸进程出现，所以还是需要使用systemd提供的stub init的。这个过程应该由用户自行判断（而不应该让Man8S判断，Man8S总是推荐使用默认配置），具体的配法的区别如下：
+
+1. 类Unix配置（假设容器使用合格的、非systemd系列的init）
+
+    ```ini
+    ProcessTwo=no
+    KillSignal=SIGTERM
+    ```
+
+2. 接管配置（容器使用不合格的init）
+
+    ```ini
+    [Exec]
+    ProcessTwo=yes
+    KillSignal=SIGRTMIN+3
+    ```
+
+3. systemd配置（容器使用systemd作为init）
+
+    ```ini
+    ProcessTwo=no
+    KillSignal=SIGRTMIN+3
+    ```
+
+可以看到这非常混乱。我建议Man8S应该主动识别容器的init类型并提供一个默认的配置方案，在安全的前提下尽可能使用类Unix配置。
+
 ## 依赖关系
 
 需要进一步研究……目前需要实现两个事，一个是确保容器“完全启动”的信息可以被处理，为了方便我们就暂时不实现这个功能。另外一个是确保容器可以定义自己的依赖和启动顺序。我觉得比较简单的方法是，可以在容器中设置“条件依赖”，容器启动时会等待条件依赖满足再启动容器。条件依赖都是简单的比如TCP端口检测、ping测试、HTTP请求之类的行为。
 
 Man8S会对容器的init进程进行一个测试，以判断它是否是一个合格的init进程，如果该init不合格，则会启动PID=2来接管容器。如果init合格，Man8S会判断init的类型，测试它对不同信号的反应，正确的完成中止进程的操作。
+
+## btrfs 集成
+
+systemd-nspawn TemporaryFileSystem 与idmap可能存在兼容性问题，btrfs snapshot对btrfs有较好的支持，但可配置性上可能不及TemporaryFileSystem。
+
+## 集群部署与严格模式
+
+容器中可能不会只有一个entrypoint。经典的例子比如seaweedfs，它的docker的同镜像需要运行多个服务，这就是说对一个镜像可能要创建几个容器，这提出了一个“cluster”的概念。
+目前 Man8S 中每个rootfs都是一个自由容器，容器的文件在反复重启中不会丢失。不过如果容器采用严格模式部署的话，就可以启动同软件的多个镜像而不重复占用空间了。
